@@ -1,8 +1,7 @@
-import { push, ref, remove, set } from "firebase/database";
+import { ref, remove, update } from "firebase/database";
 import { database } from "../services/firebase";
 
-import { FormEvent, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 import logoImg from "../assets/images/logo.svg";
 import deleteImg from "../assets/images/delete.svg"
@@ -21,18 +20,27 @@ type RoomParams = {
 };
 
 export function AdminRoom() {
-  const { user } = useAuth();
-  const params = useParams<RoomParams>();
-  const [newQuestion, setNewQuestion] = useState("");
-  const roomId = params.id;
-  const { questions, title } = useRoom(roomId!);
+  const params = useParams<RoomParams>()
+  const roomId = params.id
+  const { questions, title } = useRoom(roomId!)
+  const navigate = useNavigate()
 
-  function handleDeleQuestionId(questionId: string) {
+  async function handleEndRoom() {
+    const roomRef = ref(database, `rooms/${roomId}`)
+    update(roomRef, {
+      endedAt: new Date()
+    })
+
+    navigate('/')
+  }
+
+  async function handleDeleQuestionId(questionId: string) {
     if (window.confirm('Tem certeza que você deseja excluir esta pergunta?')) {
       const questionRef= ref(database, `rooms/${roomId}/questions/${questionId}`)
       remove(questionRef)
     }
   }
+
   return (
     <div id="page-room">
       <header>
@@ -40,7 +48,7 @@ export function AdminRoom() {
           <img src={logoImg} alt="Letmeask" />
           <div>
             <RoomCode code={`${roomId}`} />
-            <Button isOutlined>Encerrar Sala</Button>
+            <Button isOutlined onClick={handleEndRoom}>Encerrar Sala</Button>
           </div>
         </div>
       </header>
