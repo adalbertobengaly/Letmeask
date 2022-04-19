@@ -57,11 +57,10 @@ export function Room() {
   }
 
   async function handleLikeQuestion(questionId: string, likeId: string | undefined) {
-    const like = ref(database, `rooms/${roomId}/questions/${questionId}/likes`)
     if(likeId) {
-      remove(like)
+      remove(ref(database, `rooms/${roomId}/questions/${questionId}/likes/${likeId}`))
     } else {
-      set(push(like), {
+      set(push(ref(database, `rooms/${roomId}/questions/${questionId}/likes`)), {
         authorId: user?.id,
       })
     }
